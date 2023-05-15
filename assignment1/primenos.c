@@ -1,3 +1,4 @@
+//editied
 #include<stdio.h>
 int main(){
     printf("Enter range to find prime numbers \n from - ");
