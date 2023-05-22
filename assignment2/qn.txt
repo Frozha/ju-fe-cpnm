@@ -1,0 +1,13 @@
+Lab Assignment2
+Numerical Methods
+
+a) Solve a system of linear equations using Gauss-Jordan elimination, matrix inversion using Gauss-Jordan elimination, Iterative methods using Jacobi’s method, and Gauss-Seidal method
+
+b) Find the roots of a nonlinear equation using Newton-Raphson or bisection method.
+
+c) Approximate an integral using numerical integration methods such as the trapezoidal rule, Simpson's rule, or Gaussian quadrature.
+
+d) Solve an ordinary differential equation using numerical methods such as Euler's method, Runge-Kutta method.
+
+e) consider your own data implement Langange interpolation, newton forward and backward difference formulae on interpolation.
+
