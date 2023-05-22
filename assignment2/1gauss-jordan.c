@@ -2,9 +2,9 @@
 program to take input of system of linear equations and find
 solution using gauss jordan methord
 <A|B> --> reduced row echelon form
-|a  b  c|   |1 b/a c/a
-|d  e  f|-> |0 
-|g  h  i|   |
+|a  b  c|   |1 b/a     c/a   |     |1 0 ...|
+|d  e  f|-> |0 e-db/a  f-dc/a| ->  |0 1 ...|
+|g  h  i|   |0 h-gb/a  i-gc/a|     |0 0 ...|
 or gauss jordan inversion methord
 */
 
@@ -13,6 +13,7 @@ or gauss jordan inversion methord
 int DIMENSION;
 int AUGM_COL;
 int EXEP_CASE =0;
+
 void row_transform(float *a,int subject_row, int refrence_row, float coeff,float *aug){
     if(subject_row!=refrence_row){
         for(int j=0;j<AUGM_COL;j++){
@@ -48,6 +49,14 @@ void var_elimination(float *a,int subject_row,int subject_col,float *aug){
     }
 }
 
+
+void gauss_jordan(float *a,float *aug){
+    for(int i=0;i<DIMENSION;i++){
+        var_elimination(a,i,i,aug);
+        printmatx(a,aug);
+    }
+}
+
 void printmatx(float *a,float *aug){
     printf("\n");
     for(int i=0;i<DIMENSION;i++){
@@ -61,12 +70,6 @@ void printmatx(float *a,float *aug){
         printf("| \n");
     }
 }
-void gauss_jordan(float *a,float *aug){
-    for(int i=0;i<DIMENSION;i++){
-        var_elimination(a,i,i,aug);
-        printmatx(a,aug);
-    }
-}
 
 void augresultprint(float *a,float *aug){
     if(EXEP_CASE==0){
@@ -75,39 +78,49 @@ void augresultprint(float *a,float *aug){
         }
     }
     else{
-        printf("some exception occured here is final calculated augmented matrix :-\n");
+        printf("given set of equations do not have a solution.\nhere is final calculated augmented matrix :-\n");
         printmatx(a,aug);
     }
 }
 
 int main(){
+    int menu=0;
+    printf("Select methord to solve system of linear equation :-\n");
+    printf("1. gauss jordan methord\n2. gauss jordan inversion methord\n");
+    printf("your choice - ");
+    scanf("%d",&menu);
+    
     printf("Enter number of variables of system of linear equations - ");
     scanf("%d",&DIMENSION);
     float matx[DIMENSION][DIMENSION];
-    AUGM_COL=1;
-    float augmatx[DIMENSION][AUGM_COL];
-    printf("Enter coefficients of eqn in form a1x1+a2x2+a3x3 ..... =b1");
-    int a_counter=1,b_counter =1;
-    for(int i=0;i<DIMENSION;i++){
-        printf("\nEquation %d\n",i+1);
-        for(int j=0;j<DIMENSION+AUGM_COL;j++){
-            if(j<DIMENSION){
-                printf("a%d = ",a_counter);
-                a_counter++;
-                scanf("%f",&matx[i][j]);
+    
+    switch(menu){
+        case 1:
+            AUGM_COL=1;
+            float augmatx[DIMENSION][AUGM_COL];
+            printf("Enter coefficients of eqn in form a1x1+a2x2+a3x3 ..... =b1");
+            int a_counter=1,b_counter =1;
+            for(int i=0;i<DIMENSION;i++){
+                printf("\nEquation %d\n",i+1);
+                for(int j=0;j<DIMENSION+AUGM_COL;j++){
+                    if(j<DIMENSION){
+                        printf("a%d = ",a_counter);
+                        a_counter++;
+                        scanf("%f",&matx[i][j]);
+                    }
+                    else{
+                        printf("b%d = ",b_counter);
+                        b_counter++;
+                        scanf("%f",&augmatx[i][j-DIMENSION]);
+                    }
+                }
+                a_counter =1;
+                b_counter =1;
             }
-            else{
-                printf("b%d = ",b_counter);
-                b_counter++;
-                scanf("%f",&augmatx[i][j-DIMENSION]);
-            }
-        }
-        a_counter =1;
-        b_counter =1;
+
+            printmatx(matx,augmatx);
+            gauss_jordan(matx,augmatx);
+            augresultprint(matx,augmatx);
+            break;
     }
-
-    printmatx(matx,augmatx);
-    gauss_jordan(matx,augmatx);
-    augresultprint(matx,augmatx);
-
 }
