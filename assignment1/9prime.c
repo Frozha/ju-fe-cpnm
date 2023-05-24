@@ -11,11 +11,11 @@ int main(){
     for( i=lower;i<=upper;i++){
         composite_bool =0;
         int k;
-	for( k = 2;k<i/1.414;k++){
-            if (i%k==0){
-                composite_bool=1;
-                break;
-            }
+        for( k = 2;k<i/1.414;k++){
+                if (i%k==0){
+                    composite_bool=1;
+                    break;
+                }
         }
         if(composite_bool ==0){
             printf("%d ",i);

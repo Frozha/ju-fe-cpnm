@@ -21,6 +21,7 @@ void id_matx_init(float *a){
         }
     }
 }
+
 void row_transform(float *a,int subject_row, int refrence_row, float coeff,float *aug){
     if(subject_row!=refrence_row){
         for(int j=0;j<AUGM_COL;j++){
@@ -83,6 +84,21 @@ void printmatx(float *a,float *aug){
             else{printf(" %f ",*(aug+i*AUGM_COL+j-DIMENSION));}
         }
         printf("| \n");
+    }
+}
+
+void jord_inv_res(float *a,float *b){
+    //a is DIMENSION x DIMENSION
+    //b is DIMENSION x 1
+    //printing a.b
+    float sum=0;
+    printf("\n");
+    for(int i=0;i<DIMENSION;i++){//selecting row of a colm of b is 0
+        sum =0;
+        for(int k=0;k<DIMENSION;k++){
+            sum+=*(a+i*DIMENSION+k)*(*(b+k));
+        }
+        printf("x%d - %f\n",i,sum);
     }
 }
 
@@ -173,5 +189,6 @@ int main(){
             }
             printmatx(matx,id_matx);
             inverse_matx(matx,id_matx);
+            jord_inv_res(id_matx,b);
     }
 }
