@@ -2,22 +2,38 @@
 
 int DIMENSION;
 
-float xnth(int n,float *var,float *coeff,float *constnt){
+float xnth(int n,float *var,float (*coeff)[DIMENSION],float *constnt){
     float sum_eval = 0;
     int j;
     for(j=0;j<DIMENSION;j++){
         if(j!=n){
-            sum_eval +=*(coeff+n*DIMENSION + j)*(*(var+j));
+            sum_eval +=*(*(coeff+n) + j)*(*(var+j));
         } 
     }
-    return  (*(constnt+n)-sum_eval)/(*(coeff+n*DIMENSION+n));
+    return  (*(constnt+n)-sum_eval)/(*(*(coeff+n)+n));
+}
+
+
+int exceptioncase(float (*coeff)[DIMENSION]){
+    int i,j,exception=0;
+    float diag,sum;
+
+    for(i=0;i<DIMENSION&&exception==0;i++){
+        diag = *(*(coeff+i)+i);
+        sum=0;
+        for(j=0;j<DIMENSION;j++){
+            sum+=(j!=i)?(*(*(coeff+i)+j)):0;
+        }
+        exception = (diag<sum)?1:0;
+    }
+    return exception;
 }
 
 float abso(float a){
     return a>0?a:-a;
 }
 
-void gauss_sidl(float *var,float *coeff,float *constnt){
+void gauss_sidl(float *var,float (*coeff)[DIMENSION],float *constnt){
     int i,j,iteration =0;
     
     while(abso(xnth(0,var,coeff,constnt)-var[0])>0.001){
@@ -30,7 +46,7 @@ void gauss_sidl(float *var,float *coeff,float *constnt){
     printf("\nTook %d iterations",iteration);
 }
 
-void jacob(float *var,float *coeff,float *constnt){
+void jacob(float *var,float (*coeff)[DIMENSION],float *constnt){
     int i,j,iteration =0;
     float var_temp[DIMENSION];
     
@@ -81,6 +97,7 @@ int main(){
     int methord =1;
     printf("Enter iterative methord to  be used - \n1.jacobi methord\n2.Gauss-Seidel methord\nChoice(1/2) - ");
     scanf("%d",&methord);
+    methord = (exceptioncase(lin_coeff)==1)?0:methord;
     switch (methord)
     {
     case 1:
@@ -90,6 +107,8 @@ int main(){
     case 2:
         gauss_sidl(var_vals,lin_coeff,lin_const);
         break;
+    case 0:
+        printf("The entered equations cannot be solved as it diverges");
     }
     
     printf("\n");

@@ -11,121 +11,116 @@ or gauss jordan inversion methord
 #include<stdio.h>
 
 int DIMENSION;
-int AUGM_COL;
+int AUGM_COL=1;
 int EXEP_CASE =0;
 
-void id_matx_init(float *a){
-    for(int i=0;i<DIMENSION;i++){
-        for(int j=0;j<DIMENSION;j++){
-            *(a+i*DIMENSION+j) = (i==j)?1:0;
+void id_matx_init(float (*id_matx)[DIMENSION]){
+    int i,j;
+    for(i=0;i<DIMENSION;i++){
+        for(j=0;j<DIMENSION;j++){
+            *(*(id_matx+i)+j) = (i==j)?1:0;
         }
     }
 }
 
-void row_transform(float *a,int subject_row, int refrence_row, float coeff,float *aug){
+void row_transform(float (*coeff_matx)[DIMENSION],int subject_row, int refrence_row, float multiplier,float (*augm_matx)[AUGM_COL]){
+    int j;
     if(subject_row!=refrence_row){
-        for(int j=0;j<AUGM_COL;j++){
-            *(aug+subject_row*AUGM_COL+j)=*(aug+subject_row*AUGM_COL+j)+(*(aug+refrence_row*AUGM_COL+j))*(coeff);
+        for(j=0;j<AUGM_COL;j++){
+            *(*(augm_matx+subject_row)+j)+=*(*(augm_matx+refrence_row)+j)*(multiplier);
         }
-        for(int j=0;j<DIMENSION;j++){
-            *(a+subject_row*DIMENSION+j)=*(a+subject_row*DIMENSION+j)+(*(a+refrence_row*DIMENSION+j))*(coeff);
+        for(j=0;j<DIMENSION;j++){
+            *(*(coeff_matx+subject_row)+j)+=*(*(coeff_matx+refrence_row)+j)*(multiplier);
         }
     }
     else{
-        for(int j=0;j<AUGM_COL;j++){
-            *(aug+subject_row*AUGM_COL+j)=*(aug+subject_row*AUGM_COL+j)*(coeff);
+        for(j=0;j<AUGM_COL;j++){
+            *(*(augm_matx+subject_row)+j)*=multiplier;
         }
-        for(int j=0;j<DIMENSION;j++){
-            *(a+subject_row*DIMENSION+j)=(*(a+subject_row*DIMENSION+j))*(coeff);
+        for(j=0;j<DIMENSION;j++){
+            *(*(coeff_matx+subject_row)+j)*=multiplier;
         }
     }
 }
 
-void var_elimination(float *a,int subject_row,int subject_col,float *aug){
-    int solve_bool=(*(a+(subject_row*DIMENSION)+subject_col)==1)?1:0;
-    EXEP_CASE=((EXEP_CASE==0)&&(*(a+(subject_row*DIMENSION)+subject_col)==0))?1:0;
-    if((*(a+(subject_row*DIMENSION)+subject_col)!=1)&&(*(a+(subject_row*DIMENSION)+subject_col)!=0)){
-        row_transform(a,subject_row,subject_row,1/(*(a+(subject_row*DIMENSION)+subject_col)),aug);
+void var_elimination(float (*coeff_matx)[DIMENSION],int subject_row,int subject_col,float (*augm_matx)[AUGM_COL]){
+    int solve_bool=*(*(coeff_matx+subject_row)+subject_col)==1?1:0;
+    int i;
+    EXEP_CASE=((EXEP_CASE==0)&&(*(*(coeff_matx+subject_row)+subject_col)==0))?1:0;
+    if((solve_bool!=1)&&(*(*(coeff_matx+subject_row)+subject_col)!=0)){
+        row_transform(coeff_matx,subject_row,subject_row,1/(*(*(coeff_matx+subject_row)+subject_col)),augm_matx);
         solve_bool=1;
     }
-    if(solve_bool){
-        for(int i=0;i<DIMENSION;i++){
+    if(solve_bool==1&&EXEP_CASE==0){
+        for(i=0;i<DIMENSION;i++){
             if(i!=subject_row){
-                row_transform(a,i,subject_row,(*(a+i*DIMENSION+subject_col))*-1,aug);
+                row_transform(coeff_matx,i,subject_row,*(*(coeff_matx+i)+subject_col)*-1,augm_matx);
             }
         }
     }
 }
 
 
-void gauss_jordan(float *a,float *aug){
-    for(int i=0;i<DIMENSION;i++){
-        var_elimination(a,i,i,aug);
-        printmatx(a,aug);
+void gauss_jordan(float (*coeff_matx)[DIMENSION],float (*const_matx)[AUGM_COL]){
+    int i;
+    for(i=0;i<DIMENSION;i++){
+        var_elimination(coeff_matx,i,i,const_matx);
+        printmatx(coeff_matx,const_matx);
     }
 }
 
-int inverse_matx(float *a,float *idmatx){
-    for(int i=0;i<DIMENSION;i++){
-        var_elimination(a,i,i,idmatx);
-        printmatx(a,idmatx);
+int inverse_matx(float (*coeff_matx)[DIMENSION],float (*id_matx)[DIMENSION]){
+    int i;
+    for( i=0;i<DIMENSION;i++){
+        var_elimination(coeff_matx,i,i,id_matx);
+        printmatx(coeff_matx,id_matx);
     }
     return (EXEP_CASE==0)?1:0;
 }
 
-void printmatx(float *a,float *aug){
+void printmatx(float (*coeff_matx)[DIMENSION],float (*augm_matx)[AUGM_COL]){
     printf("\n");
-    for(int i=0;i<DIMENSION;i++){
+    int i,j;
+    for(i=0;i<DIMENSION;i++){
         printf("| ");
-        for(int j=0;j<DIMENSION+AUGM_COL;j++){
+        for(j=0;j<DIMENSION+AUGM_COL;j++){
             if(j<DIMENSION){
-                printf("%f ",*(a+i*DIMENSION+j));
+                printf("%f ",*(*(coeff_matx+i)+j));
             }
-            else{printf(" %f ",*(aug+i*AUGM_COL+j-DIMENSION));}
+            else{printf(" %f ",*(*(augm_matx+i)+j-DIMENSION));}
         }
         printf("| \n");
     }
 }
 
-void jord_inv_res(float *a,float *b){
-    //a is DIMENSION x DIMENSION
-    //b is DIMENSION x 1
-    //printing a.b
+void jord_inv_res(float (*coeff_matx)[DIMENSION],float (*const_matx)[1]){
     float sum=0;
     printf("\n");
-    for(int i=0;i<DIMENSION;i++){//selecting row of a colm of b is 0
+    int i,k;
+    for(i=0;i<DIMENSION;i++){
         sum =0;
-        for(int k=0;k<DIMENSION;k++){
-            sum+=*(a+i*DIMENSION+k)*(*(b+k));
+        for(k=0;k<DIMENSION;k++){
+            sum+=*(*(coeff_matx+i)+k)*(*(*(const_matx+k)));
         }
         printf("x%d - %f\n",i,sum);
     }
 }
 
-void gjresultprint(float *a,float *aug){
+void gjresultprint(float (*coeff_matx)[DIMENSION],float (*augm_matx)[AUGM_COL]){
     if(EXEP_CASE==0){
-        for(int i=0;i<DIMENSION;i++){
-            printf("x%d = %f\n",i+1,*(aug+i*AUGM_COL));
+        int i;
+        for(i=0;i<DIMENSION;i++){
+            printf("x%d = %f\n",i+1,**(augm_matx+i));
         }
     }
     else{
         printf("given set of equations do not have a solution.\nhere is final calculated augmented matrix :-\n");
-        printmatx(a,aug);
+        printmatx(coeff_matx,augm_matx);
     }
 }
-/*
-void invresultprint(float*a,float*idmatx){
-    for(int i=0;i<DIMENSION;j++){
-        printf("| ");
-        for(int j=0;j<2*DIMENSION;j++){
-            printf("%f ",(j<DIMENSION)?(a+i*DIMENSION+j):(idmatx+i*DIMENSION+j-AUGM_COL));
-        }
-        printf(" |\n");
-    }
-}
-*/
+
 int main(){
-    int menu=0;
+    int menu=0,i,j;
     printf("Select methord to solve system of linear equation :-\n");
     printf("1. gauss jordan methord\n2. gauss jordan inversion methord\n");
     printf("your choice - ");
@@ -133,62 +128,37 @@ int main(){
     
     printf("Enter number of variables of system of linear equations - ");
     scanf("%d",&DIMENSION);
-    float matx[DIMENSION][DIMENSION];
+    float coeffmatx[DIMENSION][DIMENSION];
     int a_counter=1,b_counter =1;            
-    float augmatx[DIMENSION][AUGM_COL];
+    float constmatx[DIMENSION][1];
 
+    printf("Enter coefficients of eqn in form a1x1+a2x2+a3x3 ..... =b1");
+    for(i=0;i<DIMENSION;i++){
+        printf("\nEquation %d\n",i+1);
+        for(j=0;j<DIMENSION;j++){
+            printf("a%d = ",a_counter);
+            a_counter++;
+            scanf("%f",&coeffmatx[i][j]);
+        }
+        printf("b%d = ",b_counter);
+        b_counter++;
+        scanf("%f",&constmatx[i][0]);
+        a_counter =1;
+    }
     switch(menu){
         case 1:
             AUGM_COL=1;
-            printf("Enter coefficients of eqn in form a1x1+a2x2+a3x3 ..... =b1");
-            for(int i=0;i<DIMENSION;i++){
-                printf("\nEquation %d\n",i+1);
-                for(int j=0;j<DIMENSION+AUGM_COL;j++){
-                    if(j<DIMENSION){
-                        printf("a%d = ",a_counter);
-                        a_counter++;
-                        scanf("%f",&matx[i][j]);
-                    }
-                    else{
-                        printf("b%d = ",b_counter);
-                        b_counter++;
-                        scanf("%f",&augmatx[i][j-DIMENSION]);
-                    }
-                }
-                a_counter =1;
-                b_counter =1;
-            }
-
-            printmatx(matx,augmatx);
-            gauss_jordan(matx,augmatx);
-            gjresultprint(matx,augmatx);
+            printmatx(coeffmatx,constmatx);
+            gauss_jordan(coeffmatx,constmatx);
+            gjresultprint(coeffmatx,constmatx);
             break;
         
         case 2:
             AUGM_COL = DIMENSION;
             float id_matx[DIMENSION][DIMENSION];
-            float b[DIMENSION][1];
             id_matx_init(id_matx);
-            printf("Enter coefficients of eqn in form a1x1+a2x2+a3x3 ..... =b1");
-            for(int i=0;i<DIMENSION;i++){
-                printf("\nEquation %d\n",i+1);
-                for(int j=0;j<=DIMENSION;j++){
-                    if(j<DIMENSION){
-                        printf("a%d = ",a_counter);
-                        a_counter++;
-                        scanf("%f",&matx[i][j]);
-                    }
-                    else{
-                        printf("b%d = ",b_counter);
-                        b_counter++;
-                        scanf("%f",&b[i][0]);
-                    }
-                }
-                a_counter =1;
-                b_counter =1;
-            }
-            printmatx(matx,id_matx);
-            inverse_matx(matx,id_matx);
-            jord_inv_res(id_matx,b);
+            printmatx(coeffmatx,id_matx);
+            inverse_matx(coeffmatx,id_matx);
+            jord_inv_res(id_matx,constmatx);
     }
 }
