@@ -23,6 +23,21 @@ void id_matx_init(float (*id_matx)[DIMENSION]){
     }
 }
 
+void printmatx(float (*coeff_matx)[DIMENSION],float (*augm_matx)[AUGM_COL]){
+    printf("\n");
+    int i,j;
+    for(i=0;i<DIMENSION;i++){
+        printf("| ");
+        for(j=0;j<DIMENSION+AUGM_COL;j++){
+            if(j<DIMENSION){
+                printf("%f ",*(*(coeff_matx+i)+j));
+            }
+            else{printf(" %f ",*(*(augm_matx+i)+j-DIMENSION));}
+        }
+        printf("| \n");
+    }
+}
+
 void row_transform(float (*coeff_matx)[DIMENSION],int subject_row, int refrence_row, float multiplier,float (*augm_matx)[AUGM_COL]){
     int j;
     if(subject_row!=refrence_row){
@@ -78,20 +93,7 @@ int inverse_matx(float (*coeff_matx)[DIMENSION],float (*id_matx)[DIMENSION]){
     return (EXEP_CASE==0)?1:0;
 }
 
-void printmatx(float (*coeff_matx)[DIMENSION],float (*augm_matx)[AUGM_COL]){
-    printf("\n");
-    int i,j;
-    for(i=0;i<DIMENSION;i++){
-        printf("| ");
-        for(j=0;j<DIMENSION+AUGM_COL;j++){
-            if(j<DIMENSION){
-                printf("%f ",*(*(coeff_matx+i)+j));
-            }
-            else{printf(" %f ",*(*(augm_matx+i)+j-DIMENSION));}
-        }
-        printf("| \n");
-    }
-}
+
 
 void jord_inv_res(float (*coeff_matx)[DIMENSION],float (*const_matx)[1]){
     float sum=0;
