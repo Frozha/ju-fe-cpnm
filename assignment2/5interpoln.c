@@ -79,7 +79,7 @@ float newt(float *x, float *y,float value){
 
 int main(){
     float h = 5;
-    size = 31;
+    size = 37;
     float *x = (float*)malloc(sizeof(float)*size);
     float *y = (float*)malloc(sizeof(float)*size);
     int i;
